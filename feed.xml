@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ana Sutii's blogs</title>
+    <description>Personal blog website of Ana Sutii</description>
+    <link>https://farcasia.github.io//</link>
+    <atom:link href="https://farcasia.github.io//feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Tue, 15 Dec 2020 23:22:39 +0200</pubDate>
+    <lastBuildDate>Tue, 15 Dec 2020 23:22:39 +0200</lastBuildDate>
+    <generator>Jekyll v4.0.1</generator>
+    
+      <item>
+        <title>Static factory method pattern illustrated with methods from the JDK</title>
+        <description>&lt;p&gt;The static factory method pattern is an object creational pattern that makes use of a static method to create an instance
+of the class, in combination with (usually) a private constructor for the class. Thus, the object creation is controlled
+through these factory methods.
+Thus, the static factory method is different from the &lt;code class=&quot;highlighter-rouge&quot;&gt;Factory method&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;Abstract factory&lt;/code&gt; patterns described in the
+classic &lt;a target=&quot;_blank&quot; href=&quot;https://en.wikipedia.org/wiki/Design_Patterns&quot;&gt;Gang of Four&lt;/a&gt; book.&lt;/p&gt;
+
+&lt;p&gt;Joshua Boch in &lt;a target=&quot;_blank&quot; href=&quot;https://www.goodreads.com/book/show/34927404-effective-java&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Effective Java&lt;/code&gt;&lt;/a&gt; has one of the
+best descriptions of this design pattern. Much of the wisdom in this article is derived from &lt;code class=&quot;highlighter-rouge&quot;&gt;Effective Java&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Next, we are going to see the main highlights of the static factory methods, and examples illustrating the highlights from the JDK.&lt;/p&gt;
+
+&lt;p&gt;Main highlights of the static factory method:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;They have descriptive names, improving readability.&lt;/p&gt;
+
+    &lt;p&gt;Consider methods such as these ones in &lt;code class=&quot;highlighter-rouge&quot;&gt;java.time.LocalDate&lt;/code&gt;:&lt;/p&gt;
+
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// Current date from the system clock in the default time-zone
+public static LocalDate now() { ... }
+   
+// Current date from the system clock in the supplied time-zone
+public static LocalDate now(ZoneId zone) { ... }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;They can have the same signature and different names, unlike constructors.&lt;/p&gt;
+
+    &lt;p&gt;Two methods to illustrate this can be found in &lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.Collections&lt;/code&gt;:&lt;/p&gt;
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static &amp;lt;T&amp;gt; Collection&amp;lt;T&amp;gt; synchronizedCollection(Collection&amp;lt;T&amp;gt; c)
+
+public static &amp;lt;T&amp;gt; Collection&amp;lt;T&amp;gt; unmodifiableCollection(Collection&amp;lt;? extends T&amp;gt; c) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;They can return any subtype of the return type.&lt;/p&gt;
+
+    &lt;p&gt;You can see this highlight in action in &lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.Collections&lt;/code&gt; in method &lt;code class=&quot;highlighter-rouge&quot;&gt;unmodifiableCollection&lt;/code&gt;:&lt;/p&gt;
+
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// Returns a read-only version of the collection. The UnmodifableCollection is a 
+public static &amp;lt;T&amp;gt; Collection&amp;lt;T&amp;gt; unmodifiableCollection(Collection&amp;lt;? extends T&amp;gt; c) {
+  return new UnmodifiableCollection&amp;lt;&amp;gt;(c);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;They don’t need to return a new object each time they are invoked.&lt;/p&gt;
+
+    &lt;p&gt;This is nicely illustrated in &lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.Boolean&lt;/code&gt;, in method &lt;code class=&quot;highlighter-rouge&quot;&gt;valueOf&lt;/code&gt;:&lt;/p&gt;
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// Returns one of the two static final instances of Boolean
+// that correspond to the true or false primitives. 
+public static Boolean valueOf(boolean b) {
+  return (b ? TRUE : FALSE);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Main disadvntages:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Classes with non-public and non-proteted constructors cannot be subclassed.&lt;/li&gt;
+  &lt;li&gt;The factory methods do not stand out in the documentation of the API.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;As a side note, looking at the main highlights of the static factory method, I see a some similarities with smart constructors
+as used in Scala.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 30 Nov 2020 00:00:00 +0200</pubDate>
+        <link>https://farcasia.github.io//2020/11/30/static-factory-method/</link>
+        <guid isPermaLink="true">https://farcasia.github.io//2020/11/30/static-factory-method/</guid>
+        
+        
+        <category>technical</category>
+        
+      </item>
+    
+      <item>
+        <title>Quickly generate test data in postgresql</title>
+        <description>&lt;p&gt;I often find myself in the situation to create some dummy data to test queries or postgresql functions, both for correctness and for performance. At those times, I want a way to quickly create the test data.&lt;/p&gt;
+
+&lt;p&gt;Certainly, it depends on the concrete queries or functions you have, but I find two functions very useful when creating strings, arrays, or calling functions repeatedly: &lt;a target=&quot;_blank&quot; href=&quot;https://www.postgresql.org/docs/current/functions-srf.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;generate_series&lt;/code&gt;&lt;/a&gt; and &lt;a target=&quot;_blank&quot; href=&quot;https://www.postgresql.org/docs/13/functions-math.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;random&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;These two functions are extremely simple:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;random&lt;/code&gt; returns a random double value between 0.0 (including) and 1.0 (excluding);&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;generate_series&lt;/code&gt; returns a series of values (integers, doubles, timestamps) in a range with a given step.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt; Use of generate_series and random &lt;/h3&gt;
+
+&lt;p&gt;Next, let’s see some examples of using &lt;code class=&quot;highlighter-rouge&quot;&gt;generate_series&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;random&lt;/code&gt;.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Generate text of a given number of characters&lt;/p&gt;
+
+    &lt;p&gt;Using the &lt;a target=&quot;_blank&quot; href=&quot;https://www.postgresql.org/docs/13/functions-aggregate.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;string_agg&lt;/code&gt;&lt;/a&gt; aggregate function, and the &lt;code class=&quot;highlighter-rouge&quot;&gt;generate_series&lt;/code&gt; function, we can create a string of size n.&lt;/p&gt;
+
+    &lt;hr /&gt;
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  -- generates string of size n (100), with n digits
+  select string_agg((i%10)::text, '') from generate_series(1,100) as t(i);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+
+    &lt;hr /&gt;
+
+    &lt;p&gt;or&lt;/p&gt;
+
+    &lt;hr /&gt;
+
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; -- generates string of size n (100), with a character repeated n times
+ select string_agg('a', '') from generate_series(1,100) as t(i);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+
+    &lt;hr /&gt;
+
+    &lt;p&gt;or&lt;/p&gt;
+
+    &lt;hr /&gt;
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; --- generates string of size n (100), with n random characters    
+ select string_agg(chr(ascii('a') + (random()*25)::integer), '')
+ from generate_series(1, 100);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+
+    &lt;hr /&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Generate an array of a given size.&lt;/p&gt;
+
+    &lt;hr /&gt;
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; select array_agg(i) from generate_series(1,10) as t(i);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+
+    &lt;hr /&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Call a function n times.&lt;/p&gt;
+
+    &lt;hr /&gt;
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; select random() from generate_series(1, 10);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+
+    &lt;hr /&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;These two functions are only building blocks for what in the end can be pretty complex test data.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 30 Oct 2020 00:00:00 +0200</pubDate>
+        <link>https://farcasia.github.io//2020/10/30/quickly-generate-test-data/</link>
+        <guid isPermaLink="true">https://farcasia.github.io//2020/10/30/quickly-generate-test-data/</guid>
+        
+        
+        <category>technical</category>
+        
+      </item>
+    
+      <item>
+        <title>Polymorphic functions and polymorphic types in postgreSQL</title>
+        <description>&lt;p&gt;One thing that caught my eye in postgreSQL 10 is the type system of functions in the SQL procedural language (PL/pgSQL). More specifically, I am talking about &lt;a target=&quot;_blank&quot; href=&quot;https://www.postgresql.org/docs/current/extend-type-system.html#EXTEND-TYPES-POLYMORPHIC&quot;&gt;polymorphic functions and the associated polymorphic types&lt;/a&gt;. The type of polymorphism at play in these functions is &lt;a target=&quot;_blank&quot; href=&quot;https://en.wikipedia.org/wiki/Parametric_polymorphism&quot;&gt;parametric polymorphism&lt;/a&gt;, with some twists, as you shall see in the rest of the article.&lt;/p&gt;
+
+&lt;p&gt;This is not the first thing someone would find attractive about postgreSQL, but I am very much interested in type systems and their peculiarities. And the type system of postgreSQL polymorphic functions is what I would call peculiar; at least at first sight. That’s mostly because of its restrictions. I was trying to find reasons for why these restrictions are in place, but I could not find any details in the source code comments of postgreSQL, or in the early papers written on postgreSQL. If someone can shed some light on the historical reasons behind these restrictions, I would be most interested in knowing them. In the meantime, I can only try to come up with possible reasons myself.&lt;/p&gt;
+
+&lt;p&gt;There are five polymorphic types in postgreSQL: anyarray, anyelement, anynonarray, anyenum and anyrange. They are part of a larger category of so called pseudo-types. There is no reason to go into explanations and examples here, as they are explained and exemplified in the &lt;a target=&quot;_blank&quot; href=&quot;https://www.postgresql.org/docs/current/extend-type-system.html#EXTEND-TYPES-POLYMORPHIC&quot;&gt;documentation&lt;/a&gt;; plus, some of them are self explanatory.&lt;/p&gt;
+
+&lt;p&gt;Some restrictions of polymorphic types that I find intriguing:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Polymorphic types can only be used as types for function parameters or function return types. Thus, they cannot be used as types for column data or function variables, for instance. I assume this restriction is in place to simplify the typesystem of PL/pgSOL because, with this restriction in place, the actual types can be identified from the function call types.&lt;/li&gt;
+  &lt;li&gt;If you have multiple polymorphic types in the signature of the function, they all need to be the same type at function call time. I assume this is so that we can make restriction number three work.&lt;/li&gt;
+  &lt;li&gt;If you have a polymorphic type as a return type, then you need to have at least one parameter of polymorphic type. This is probably because now the type of the return type can be identified from the function call types.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Let us watch polymorphic types at work in the next section. You will get a feeling of the consequences of these three restrictions.&lt;/p&gt;
+
+&lt;p&gt;In the first gist, the &lt;code class=&quot;highlighter-rouge&quot;&gt;sum_elements&lt;/code&gt; function is a simple function, that sums up an array with elements of any type, &lt;code class=&quot;highlighter-rouge&quot;&gt;arr&lt;/code&gt;, and the given initial value, &lt;code class=&quot;highlighter-rouge&quot;&gt;init&lt;/code&gt;. Normally, this would be everything you need as input to this function. In PL/pgSQL though, we still need one more input parameter: a variable of the same type as the array elements. That’s because of restriction number one, which says that a polymorphic type can only be the type of a function parameter. We cannot define this variable &lt;code class=&quot;highlighter-rouge&quot;&gt;el&lt;/code&gt; as a function variable, but we need it to iterate over elements of the array in the body of the function. Thus, I need to declare it as a function parameter. This makes this function signature more confusing than it should be. 
+&lt;script src=&quot;https://gist.github.com/farcasia/7aad8d5601c1a06d2e31fc71277dedba.js&quot;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Of course, this function will only work for arrays whose elements have the &lt;code class=&quot;highlighter-rouge&quot;&gt;+&lt;/code&gt; operator. Thus, the call in gist number two would work fine, while the call in the third gist would not. Unfortunately, you would only find out at run time that the &lt;code class=&quot;highlighter-rouge&quot;&gt;text&lt;/code&gt; type does not support a &lt;code class=&quot;highlighter-rouge&quot;&gt;+&lt;/code&gt; operator.
+&lt;script src=&quot;https://gist.github.com/farcasia/00baba75a10a41564980e04b3448f763.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://gist.github.com/farcasia/b4f585b45d0cc6783eb9e7559426e85f.js&quot;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;A question you could ask about these polymorphic functions, is what happens if a function with the same name, and more concrete parameter types is present in the database (think of type &lt;code class=&quot;highlighter-rouge&quot;&gt;int&lt;/code&gt; instead of all polymorphic types)? In postgreSQL 10 at least, this more concrete version of the function will take precedence. Thus, be aware of that, or otherwise you might get unexpected behavior.&lt;/p&gt;
+
+&lt;p&gt;Obviously, &lt;code class=&quot;highlighter-rouge&quot;&gt;sum_elements&lt;/code&gt; is only a dummy function, not production-ready, since it completely lacks error handling. It helps illustrate polymorphic functions though, and the extra potential baggage they can bring: non-obvious function parameters, obfuscation by more functions with the same name and more concrete parameters, or more complex error handling code. All this being said, you might still not be able to do without them in certain situations.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 28 Dec 2019 00:00:00 +0200</pubDate>
+        <link>https://farcasia.github.io//2019/12/28/polymorphic-functions-plpgsql/</link>
+        <guid isPermaLink="true">https://farcasia.github.io//2019/12/28/polymorphic-functions-plpgsql/</guid>
+        
+        
+        <category>technical</category>
+        
+      </item>
+    
+      <item>
+        <title>Consistency in the CAP theorem vs. consistency in ACID transactions</title>
+        <description>&lt;p&gt;On the path of becoming a better version of myself, I am trying to read at least a technical book a month (or a few chapters, if the book is very theoretical or on a subject that I am not familiar with). This month I am all into the fundamentals of processing and storing data, laid out in the book “Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems” by Martin Kleppmann. This is truly an impressive book in terms of breadth of concepts and tools in the realm of data applications. Admittedly, at points it can be overwhelming, but it is definitely worth sticking to it.&lt;/p&gt;
+
+&lt;p&gt;While reading the book, one thing that struck me, that I did not consider before, are the different meanings of the word consistency in the CAP theorem and ACID transactions. In the following two sections, I will go into the meaning of C (standing for consistency) in ACID and CAP, and into the history of how these acronyms came to be. Understanding the history often helps us better understand the concepts.&lt;/p&gt;
+
+&lt;h2&gt; C for consistency in ACID transactions &lt;/h2&gt;
+&lt;p&gt;The first paper where database transactions are defined in terms of ACID properties (without actually mentioning the ACID acronym, and without considering the I in ACID), is the following: &lt;a target=&quot;_blank&quot; href=&quot;https://www.hpl.hp.com/techreports/tandem/TR-81.3.pdf&quot;&gt;The transaction concept: Virtues and Limitations&lt;/a&gt;.
+Here, consistency is defined as follows “Consistency: the transaction must obey legal protocols.” Nowhere is it mentioned what these legal protocols are. Later in the paper, we find out that “The system provides actions which read and transform the values of records and devices. A collection of actions which comprise a consistent transformation of the state may be grouped to form a transaction. Transactions preserve the system consistency constraints - they obey the laws by transforming consistent states into new consistent states.” The language used in the citation is somewhat old-fashioned because the paper is from 1981. In the quote, “the system” is a general application, not necessarily a data management application. Moreover, what a consistent state is, depends on the business requirements of the application itself.&lt;/p&gt;
+
+&lt;p&gt;The paper that coined the word ACID is &lt;a target=&quot;_blank&quot; href=&quot;https://web.stanford.edu/class/cs340v/papers/recovery.pdf&quot;&gt;Principles of Transaction-Oriented Database Recovery&lt;/a&gt;. Here, “A transaction reaching its normal end (EOT, end of transaction), thereby committing its results, preserves the consistency of the database. In other words, each successful transaction by definition commits only legal results.”
+Admittedly, neither this, nor the other definitions are very precise. As also suggested by Martin Kleppmann, maintaining consistency is the responsibility of the application developers. They are the ones that need to make sure the data adheres to certain invariants before and after the execution of the transaction. An example of such an invariant could be the following: in a banking application, the amount of money in an account should never go below zero.&lt;/p&gt;
+
+&lt;h2&gt; C for consistency in the CAP theorem &lt;/h2&gt;
+&lt;p&gt;The CAP theorem, also named Brewer’s conjecture, was first mentioned in an invited talk at the PODC (Principles of Distributed Computing) conference. The conjecture, stating the impossibility of having both consistency and availability in the presence of network partitions, was published in &lt;a target=&quot;_blank&quot; href=&quot;https://users.ece.cmu.edu/~adrian/731-sp04/readings/GL-cap.pdf&quot;&gt;Brewer’s Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services&lt;/a&gt;. Here, consistency is defined as follows “Under this consistency guarantee, there must exist a total order on all operations such that each operation looks as if it were completed at a single instant.” The context for this theorem is a distributed datastore, with replicas (so-called instant in the quote) containing copies of the data.&lt;/p&gt;
+
+&lt;p&gt;In the CAP theorem, consistency is equivalent to the so-called linearizability property. Linearizability gives the impression that there is just one copy of the database, even in the presence of multiple replicas. Thus, whenever any client reads any data (from whatever replica), that data is the most recently written data. How that is achieved is a completely different story, and can also be read in Martin Kleppmann’s book.&lt;/p&gt;
+
+&lt;h2&gt; Conclusion &lt;/h2&gt;
+&lt;p&gt;In this post I have gone through the meaning of consistency in the CAP theorem and ACID transactions, and I have also touched a bit on the history of these acronyms. This exploration is part of an effort to understand the basics of concepts I make use of in my day to day work.&lt;/p&gt;
+
+&lt;p&gt;Until next time!&lt;/p&gt;
+</description>
+        <pubDate>Sat, 09 Nov 2019 00:00:00 +0200</pubDate>
+        <link>https://farcasia.github.io//2019/11/09/consistency-overloaded/</link>
+        <guid isPermaLink="true">https://farcasia.github.io//2019/11/09/consistency-overloaded/</guid>
+        
+        
+        <category>technical</category>
+        
+      </item>
+    
+  </channel>
+</rss>

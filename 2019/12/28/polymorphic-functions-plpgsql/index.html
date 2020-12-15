@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Polymorphic functions and polymorphic types in postgreSQL | Ana Sutii's blogs</title>
+  <meta name="author" content="Ana Maria Sutii">
+  <meta name="description" content="Personal blog website of Ana Sutii">
+  <meta property="og:title" content="Polymorphic functions and polymorphic types in postgreSQL | Ana Sutii's blogs">
+  <meta property="og:url" content="https://farcasia.github.io//2019/12/28/polymorphic-functions-plpgsql/">
+  <meta property="og:site_name" content="Ana Sutii's blogs">
+  <meta property="og:description" content="Polymorphic functions and polymorphic types in postgreSQL">
+  <meta property="og:image" content="/assets/img/Polymorphism2.png">
+  <meta property="og:type" content="blog">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:description" content="Polymorphic functions and polymorphic types in postgreSQL">
+  <meta name="twitter:title" content="Polymorphic functions and polymorphic types in postgreSQL | Ana Sutii's blogs">
+  <meta name="twitter:url" content="https://farcasia.github.io//2019/12/28/polymorphic-functions-plpgsql/">
+  <meta name="twitter:site" content="Ana Sutii's blogs">
+  <meta name="twitter:creator" content="@https://twitter.com/a_farcasi">
+  <meta name="twitter:domain" content="https://farcasia.github.io/">
+  <meta property="twitter:image" content="/assets/img/Polymorphism2.png">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata|Lora|Space+Mono:700">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <link rel="alternate" type="application/rss+xml" title="Ana Sutii's blogs" href="https://farcasia.github.io//feed.xml">
+  <link rel="canonical" href="https://farcasia.github.io//2019/12/28/polymorphic-functions-plpgsql/">
+
+  
+</head>
+
+
+  <body>
+
+    <main>
+      <article itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="section-padding--lg mast rellax" data-rellax-speed="-4">
+    <a class="nav nav--white" href="/">
+      <i class="fa fa-lg fa-arrow-left"></i>
+      <span>Back to Posts</span>
+    </a>
+    <figure class="absolute-bg mast__img" style="background-image: url('/assets/img/Polymorphism2.png');"></figure>
+    <div class="mast__container">
+      <span><time datetime="2019-12-28T00:00:00+02:00" itemprop="datePublished">Dec 28, 2019</time></span>
+      <h1 itemprop="name headline">Polymorphic functions and polymorphic types in postgreSQL</h1>
+      
+        <span>Posted in 
+          
+            <a class="nav--white" href="/category/technical">technical</a>
+          
+        </span>
+      
+      <span></span>
+    </div>
+  </header>
+
+  <section class="section-padding bg-grey" itemprop="articleBody">
+    <div class="post">
+      <p>One thing that caught my eye in postgreSQL 10 is the type system of functions in the SQL procedural language (PL/pgSQL). More specifically, I am talking about <a target="_blank" href="https://www.postgresql.org/docs/current/extend-type-system.html#EXTEND-TYPES-POLYMORPHIC">polymorphic functions and the associated polymorphic types</a>. The type of polymorphism at play in these functions is <a target="_blank" href="https://en.wikipedia.org/wiki/Parametric_polymorphism">parametric polymorphism</a>, with some twists, as you shall see in the rest of the article.</p>
+
+<p>This is not the first thing someone would find attractive about postgreSQL, but I am very much interested in type systems and their peculiarities. And the type system of postgreSQL polymorphic functions is what I would call peculiar; at least at first sight. That’s mostly because of its restrictions. I was trying to find reasons for why these restrictions are in place, but I could not find any details in the source code comments of postgreSQL, or in the early papers written on postgreSQL. If someone can shed some light on the historical reasons behind these restrictions, I would be most interested in knowing them. In the meantime, I can only try to come up with possible reasons myself.</p>
+
+<p>There are five polymorphic types in postgreSQL: anyarray, anyelement, anynonarray, anyenum and anyrange. They are part of a larger category of so called pseudo-types. There is no reason to go into explanations and examples here, as they are explained and exemplified in the <a target="_blank" href="https://www.postgresql.org/docs/current/extend-type-system.html#EXTEND-TYPES-POLYMORPHIC">documentation</a>; plus, some of them are self explanatory.</p>
+
+<p>Some restrictions of polymorphic types that I find intriguing:</p>
+
+<ol>
+  <li>Polymorphic types can only be used as types for function parameters or function return types. Thus, they cannot be used as types for column data or function variables, for instance. I assume this restriction is in place to simplify the typesystem of PL/pgSOL because, with this restriction in place, the actual types can be identified from the function call types.</li>
+  <li>If you have multiple polymorphic types in the signature of the function, they all need to be the same type at function call time. I assume this is so that we can make restriction number three work.</li>
+  <li>If you have a polymorphic type as a return type, then you need to have at least one parameter of polymorphic type. This is probably because now the type of the return type can be identified from the function call types.</li>
+</ol>
+
+<p>Let us watch polymorphic types at work in the next section. You will get a feeling of the consequences of these three restrictions.</p>
+
+<p>In the first gist, the <code class="highlighter-rouge">sum_elements</code> function is a simple function, that sums up an array with elements of any type, <code class="highlighter-rouge">arr</code>, and the given initial value, <code class="highlighter-rouge">init</code>. Normally, this would be everything you need as input to this function. In PL/pgSQL though, we still need one more input parameter: a variable of the same type as the array elements. That’s because of restriction number one, which says that a polymorphic type can only be the type of a function parameter. We cannot define this variable <code class="highlighter-rouge">el</code> as a function variable, but we need it to iterate over elements of the array in the body of the function. Thus, I need to declare it as a function parameter. This makes this function signature more confusing than it should be. 
+<script src="https://gist.github.com/farcasia/7aad8d5601c1a06d2e31fc71277dedba.js"></script></p>
+
+<p>Of course, this function will only work for arrays whose elements have the <code class="highlighter-rouge">+</code> operator. Thus, the call in gist number two would work fine, while the call in the third gist would not. Unfortunately, you would only find out at run time that the <code class="highlighter-rouge">text</code> type does not support a <code class="highlighter-rouge">+</code> operator.
+<script src="https://gist.github.com/farcasia/00baba75a10a41564980e04b3448f763.js"></script>
+<script src="https://gist.github.com/farcasia/b4f585b45d0cc6783eb9e7559426e85f.js"></script></p>
+
+<p>A question you could ask about these polymorphic functions, is what happens if a function with the same name, and more concrete parameter types is present in the database (think of type <code class="highlighter-rouge">int</code> instead of all polymorphic types)? In postgreSQL 10 at least, this more concrete version of the function will take precedence. Thus, be aware of that, or otherwise you might get unexpected behavior.</p>
+
+<p>Obviously, <code class="highlighter-rouge">sum_elements</code> is only a dummy function, not production-ready, since it completely lacks error handling. It helps illustrate polymorphic functions though, and the extra potential baggage they can bring: non-obvious function parameters, obfuscation by more functions with the same name and more concrete parameters, or more complex error handling code. All this being said, you might still not be able to do without them in certain situations.</p>
+
+    </div>
+  </section>
+
+  <section class="profile">
+    <div class="profile__card">
+      <div class="profile__img">
+        <figure class="absolute-bg" style="background-image: url('/assets/img/IMG_6239.JPG');"></figure>
+      </div>
+      <div class="profile__container">
+        <p>Ana Maria Sutii - software engineer at ING Labs Amsterdam</p>
+        
+          <ul class="profile__social">
+            
+              <li><a class="fa fa-lg fa-envelope-o" href="mailto:farcasia@gmail.com"></a></li>
+            
+            
+              <li><a class="fa fa-lg fa-github" href="https://github.com/farcasia" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-linkedin" href="https://www.linkedin.com/in/ana-maria-sutii-7b246a23" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-twitter" href="https://twitter.com/a_farcasi" target="_blank"></a></li>
+            
+          </ul>
+        
+      </div>
+    </div>
+  </section>
+
+</article>
+
+
+  <section class="next">
+    <a class="next__link" href="/2019/11/09/consistency-overloaded/" style="background-image: url('/assets/img/Consistency6.png');">
+      <div class="next__container">
+        <span>Read Next</span>
+        <h2>Consistency in the CAP theorem vs. consistency in ACID transactions</h2>
+      </div>
+    </a>
+  </section>
+
+
+    </main>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rellax/1.0.0/rellax.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+<script type="text/javascript" src="/assets/js/app.js"></script>
+
+
+  </body>
+
+</html>

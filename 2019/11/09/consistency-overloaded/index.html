@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Consistency in the CAP theorem vs. consistency in ACID transactions | Ana Sutii's blogs</title>
+  <meta name="author" content="Ana Maria Sutii">
+  <meta name="description" content="Personal blog website of Ana Sutii">
+  <meta property="og:title" content="Consistency in the CAP theorem vs. consistency in ACID transactions | Ana Sutii's blogs">
+  <meta property="og:url" content="https://farcasia.github.io//2019/11/09/consistency-overloaded/">
+  <meta property="og:site_name" content="Ana Sutii's blogs">
+  <meta property="og:description" content="On the different meanings of consistency in the CAP theorem and ACID transactions">
+  <meta property="og:image" content="/assets/img/Consistency6.png">
+  <meta property="og:type" content="blog">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:description" content="On the different meanings of consistency in the CAP theorem and ACID transactions">
+  <meta name="twitter:title" content="Consistency in the CAP theorem vs. consistency in ACID transactions | Ana Sutii's blogs">
+  <meta name="twitter:url" content="https://farcasia.github.io//2019/11/09/consistency-overloaded/">
+  <meta name="twitter:site" content="Ana Sutii's blogs">
+  <meta name="twitter:creator" content="@https://twitter.com/a_farcasi">
+  <meta name="twitter:domain" content="https://farcasia.github.io/">
+  <meta property="twitter:image" content="/assets/img/Consistency6.png">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata|Lora|Space+Mono:700">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <link rel="alternate" type="application/rss+xml" title="Ana Sutii's blogs" href="https://farcasia.github.io//feed.xml">
+  <link rel="canonical" href="https://farcasia.github.io//2019/11/09/consistency-overloaded/">
+
+  
+</head>
+
+
+  <body>
+
+    <main>
+      <article itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="section-padding--lg mast rellax" data-rellax-speed="-4">
+    <a class="nav nav--white" href="/">
+      <i class="fa fa-lg fa-arrow-left"></i>
+      <span>Back to Posts</span>
+    </a>
+    <figure class="absolute-bg mast__img" style="background-image: url('/assets/img/Consistency6.png');"></figure>
+    <div class="mast__container">
+      <span><time datetime="2019-11-09T00:00:00+02:00" itemprop="datePublished">Nov 9, 2019</time></span>
+      <h1 itemprop="name headline">Consistency in the CAP theorem vs. consistency in ACID transactions</h1>
+      
+        <span>Posted in 
+          
+            <a class="nav--white" href="/category/technical">technical</a>
+          
+        </span>
+      
+      <span></span>
+    </div>
+  </header>
+
+  <section class="section-padding bg-grey" itemprop="articleBody">
+    <div class="post">
+      <p>On the path of becoming a better version of myself, I am trying to read at least a technical book a month (or a few chapters, if the book is very theoretical or on a subject that I am not familiar with). This month I am all into the fundamentals of processing and storing data, laid out in the book “Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems” by Martin Kleppmann. This is truly an impressive book in terms of breadth of concepts and tools in the realm of data applications. Admittedly, at points it can be overwhelming, but it is definitely worth sticking to it.</p>
+
+<p>While reading the book, one thing that struck me, that I did not consider before, are the different meanings of the word consistency in the CAP theorem and ACID transactions. In the following two sections, I will go into the meaning of C (standing for consistency) in ACID and CAP, and into the history of how these acronyms came to be. Understanding the history often helps us better understand the concepts.</p>
+
+<h2> C for consistency in ACID transactions </h2>
+<p>The first paper where database transactions are defined in terms of ACID properties (without actually mentioning the ACID acronym, and without considering the I in ACID), is the following: <a target="_blank" href="https://www.hpl.hp.com/techreports/tandem/TR-81.3.pdf">The transaction concept: Virtues and Limitations</a>.
+Here, consistency is defined as follows “Consistency: the transaction must obey legal protocols.” Nowhere is it mentioned what these legal protocols are. Later in the paper, we find out that “The system provides actions which read and transform the values of records and devices. A collection of actions which comprise a consistent transformation of the state may be grouped to form a transaction. Transactions preserve the system consistency constraints - they obey the laws by transforming consistent states into new consistent states.” The language used in the citation is somewhat old-fashioned because the paper is from 1981. In the quote, “the system” is a general application, not necessarily a data management application. Moreover, what a consistent state is, depends on the business requirements of the application itself.</p>
+
+<p>The paper that coined the word ACID is <a target="_blank" href="https://web.stanford.edu/class/cs340v/papers/recovery.pdf">Principles of Transaction-Oriented Database Recovery</a>. Here, “A transaction reaching its normal end (EOT, end of transaction), thereby committing its results, preserves the consistency of the database. In other words, each successful transaction by definition commits only legal results.”
+Admittedly, neither this, nor the other definitions are very precise. As also suggested by Martin Kleppmann, maintaining consistency is the responsibility of the application developers. They are the ones that need to make sure the data adheres to certain invariants before and after the execution of the transaction. An example of such an invariant could be the following: in a banking application, the amount of money in an account should never go below zero.</p>
+
+<h2> C for consistency in the CAP theorem </h2>
+<p>The CAP theorem, also named Brewer’s conjecture, was first mentioned in an invited talk at the PODC (Principles of Distributed Computing) conference. The conjecture, stating the impossibility of having both consistency and availability in the presence of network partitions, was published in <a target="_blank" href="https://users.ece.cmu.edu/~adrian/731-sp04/readings/GL-cap.pdf">Brewer’s Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services</a>. Here, consistency is defined as follows “Under this consistency guarantee, there must exist a total order on all operations such that each operation looks as if it were completed at a single instant.” The context for this theorem is a distributed datastore, with replicas (so-called instant in the quote) containing copies of the data.</p>
+
+<p>In the CAP theorem, consistency is equivalent to the so-called linearizability property. Linearizability gives the impression that there is just one copy of the database, even in the presence of multiple replicas. Thus, whenever any client reads any data (from whatever replica), that data is the most recently written data. How that is achieved is a completely different story, and can also be read in Martin Kleppmann’s book.</p>
+
+<h2> Conclusion </h2>
+<p>In this post I have gone through the meaning of consistency in the CAP theorem and ACID transactions, and I have also touched a bit on the history of these acronyms. This exploration is part of an effort to understand the basics of concepts I make use of in my day to day work.</p>
+
+<p>Until next time!</p>
+
+    </div>
+  </section>
+
+  <section class="profile">
+    <div class="profile__card">
+      <div class="profile__img">
+        <figure class="absolute-bg" style="background-image: url('/assets/img/IMG_6239.JPG');"></figure>
+      </div>
+      <div class="profile__container">
+        <p>Ana Maria Sutii - software engineer at ING Labs Amsterdam</p>
+        
+          <ul class="profile__social">
+            
+              <li><a class="fa fa-lg fa-envelope-o" href="mailto:farcasia@gmail.com"></a></li>
+            
+            
+              <li><a class="fa fa-lg fa-github" href="https://github.com/farcasia" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-linkedin" href="https://www.linkedin.com/in/ana-maria-sutii-7b246a23" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-twitter" href="https://twitter.com/a_farcasi" target="_blank"></a></li>
+            
+          </ul>
+        
+      </div>
+    </div>
+  </section>
+
+</article>
+
+
+
+    </main>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rellax/1.0.0/rellax.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+<script type="text/javascript" src="/assets/js/app.js"></script>
+
+
+  </body>
+
+</html>

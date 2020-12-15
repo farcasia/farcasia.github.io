@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Quickly generate test data in postgresql | Ana Sutii's blogs</title>
+  <meta name="author" content="Ana Maria Sutii">
+  <meta name="description" content="Personal blog website of Ana Sutii">
+  <meta property="og:title" content="Quickly generate test data in postgresql | Ana Sutii's blogs">
+  <meta property="og:url" content="https://farcasia.github.io//2020/10/30/quickly-generate-test-data/">
+  <meta property="og:site_name" content="Ana Sutii's blogs">
+  <meta property="og:description" content="Generation of test data in postgresql">
+  <meta property="og:image" content="/assets/img/Simple.png">
+  <meta property="og:type" content="blog">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:description" content="Generation of test data in postgresql">
+  <meta name="twitter:title" content="Quickly generate test data in postgresql | Ana Sutii's blogs">
+  <meta name="twitter:url" content="https://farcasia.github.io//2020/10/30/quickly-generate-test-data/">
+  <meta name="twitter:site" content="Ana Sutii's blogs">
+  <meta name="twitter:creator" content="@https://twitter.com/a_farcasi">
+  <meta name="twitter:domain" content="https://farcasia.github.io/">
+  <meta property="twitter:image" content="/assets/img/Simple.png">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata|Lora|Space+Mono:700">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <link rel="alternate" type="application/rss+xml" title="Ana Sutii's blogs" href="https://farcasia.github.io//feed.xml">
+  <link rel="canonical" href="https://farcasia.github.io//2020/10/30/quickly-generate-test-data/">
+
+  
+</head>
+
+
+  <body>
+
+    <main>
+      <article itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="section-padding--lg mast rellax" data-rellax-speed="-4">
+    <a class="nav nav--white" href="/">
+      <i class="fa fa-lg fa-arrow-left"></i>
+      <span>Back to Posts</span>
+    </a>
+    <figure class="absolute-bg mast__img" style="background-image: url('/assets/img/Simple.png');"></figure>
+    <div class="mast__container">
+      <span><time datetime="2020-10-30T00:00:00+02:00" itemprop="datePublished">Oct 30, 2020</time></span>
+      <h1 itemprop="name headline">Quickly generate test data in postgresql</h1>
+      
+        <span>Posted in 
+          
+            <a class="nav--white" href="/category/technical">technical</a>
+          
+        </span>
+      
+      <span></span>
+    </div>
+  </header>
+
+  <section class="section-padding bg-grey" itemprop="articleBody">
+    <div class="post">
+      <p>I often find myself in the situation to create some dummy data to test queries or postgresql functions, both for correctness and for performance. At those times, I want a way to quickly create the test data.</p>
+
+<p>Certainly, it depends on the concrete queries or functions you have, but I find two functions very useful when creating strings, arrays, or calling functions repeatedly: <a target="_blank" href="https://www.postgresql.org/docs/current/functions-srf.html"><code class="highlighter-rouge">generate_series</code></a> and <a target="_blank" href="https://www.postgresql.org/docs/13/functions-math.html"><code class="highlighter-rouge">random</code></a>.</p>
+
+<p>These two functions are extremely simple:</p>
+<ul>
+  <li><code class="highlighter-rouge">random</code> returns a random double value between 0.0 (including) and 1.0 (excluding);</li>
+  <li><code class="highlighter-rouge">generate_series</code> returns a series of values (integers, doubles, timestamps) in a range with a given step.</li>
+</ul>
+
+<h3> Use of generate_series and random </h3>
+
+<p>Next, let’s see some examples of using <code class="highlighter-rouge">generate_series</code> and <code class="highlighter-rouge">random</code>.</p>
+
+<ol>
+  <li>
+    <p>Generate text of a given number of characters</p>
+
+    <p>Using the <a target="_blank" href="https://www.postgresql.org/docs/13/functions-aggregate.html"><code class="highlighter-rouge">string_agg</code></a> aggregate function, and the <code class="highlighter-rouge">generate_series</code> function, we can create a string of size n.</p>
+
+    <hr />
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  -- generates string of size n (100), with n digits
+  select string_agg((i%10)::text, '') from generate_series(1,100) as t(i);
+</code></pre></div>    </div>
+
+    <hr />
+
+    <p>or</p>
+
+    <hr />
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> -- generates string of size n (100), with a character repeated n times
+ select string_agg('a', '') from generate_series(1,100) as t(i);
+</code></pre></div>    </div>
+
+    <hr />
+
+    <p>or</p>
+
+    <hr />
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> --- generates string of size n (100), with n random characters    
+ select string_agg(chr(ascii('a') + (random()*25)::integer), '')
+ from generate_series(1, 100);
+</code></pre></div>    </div>
+
+    <hr />
+  </li>
+  <li>
+    <p>Generate an array of a given size.</p>
+
+    <hr />
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> select array_agg(i) from generate_series(1,10) as t(i);
+</code></pre></div>    </div>
+
+    <hr />
+  </li>
+  <li>
+    <p>Call a function n times.</p>
+
+    <hr />
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> select random() from generate_series(1, 10);
+</code></pre></div>    </div>
+
+    <hr />
+  </li>
+</ol>
+
+<p>These two functions are only building blocks for what in the end can be pretty complex test data.</p>
+
+    </div>
+  </section>
+
+  <section class="profile">
+    <div class="profile__card">
+      <div class="profile__img">
+        <figure class="absolute-bg" style="background-image: url('/assets/img/IMG_6239.JPG');"></figure>
+      </div>
+      <div class="profile__container">
+        <p>Ana Maria Sutii - software engineer at ING Labs Amsterdam</p>
+        
+          <ul class="profile__social">
+            
+              <li><a class="fa fa-lg fa-envelope-o" href="mailto:farcasia@gmail.com"></a></li>
+            
+            
+              <li><a class="fa fa-lg fa-github" href="https://github.com/farcasia" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-linkedin" href="https://www.linkedin.com/in/ana-maria-sutii-7b246a23" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-twitter" href="https://twitter.com/a_farcasi" target="_blank"></a></li>
+            
+          </ul>
+        
+      </div>
+    </div>
+  </section>
+
+</article>
+
+
+  <section class="next">
+    <a class="next__link" href="/2019/12/28/polymorphic-functions-plpgsql/" style="background-image: url('/assets/img/Polymorphism2.png');">
+      <div class="next__container">
+        <span>Read Next</span>
+        <h2>Polymorphic functions and polymorphic types in postgreSQL</h2>
+      </div>
+    </a>
+  </section>
+
+
+    </main>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rellax/1.0.0/rellax.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+<script type="text/javascript" src="/assets/js/app.js"></script>
+
+
+  </body>
+
+</html>

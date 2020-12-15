@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>https://farcasia.github.io//2019/11/09/consistency-overloaded/</loc>
+<lastmod>2019-11-09T00:00:00+02:00</lastmod>
+</url>
+<url>
+<loc>https://farcasia.github.io//2019/12/28/polymorphic-functions-plpgsql/</loc>
+<lastmod>2019-12-28T00:00:00+02:00</lastmod>
+</url>
+<url>
+<loc>https://farcasia.github.io//2020/10/30/quickly-generate-test-data/</loc>
+<lastmod>2020-10-30T00:00:00+02:00</lastmod>
+</url>
+<url>
+<loc>https://farcasia.github.io//2020/11/30/static-factory-method/</loc>
+<lastmod>2020-11-30T00:00:00+02:00</lastmod>
+</url>
+<url>
+<loc>https://farcasia.github.io//old_posts/2019-10-03-Improv-theater-guidelines/</loc>
+</url>
+<url>
+<loc>https://farcasia.github.io//old_posts/2019-11-22-on-being-funny-in-improv-theather/</loc>
+</url>
+<url>
+<loc>https://farcasia.github.io//archive/</loc>
+</url>
+<url>
+<loc>https://farcasia.github.io//category/technical/</loc>
+</url>
+<url>
+<loc>https://farcasia.github.io//category/technical/</loc>
+</url>
+<url>
+<loc>https://farcasia.github.io//collection/posts/</loc>
+</url>
+</urlset>
